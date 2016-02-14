@@ -14,13 +14,28 @@ var $ = (function(){
     _xhr.send(_postData);
   };
 
+  var get = function(opt){
+    opt.method = "GET";
+    ajax(opt);
+  };
+
+  var post = function(opt){
+    opt.method = "POST";
+    ajax(opt);
+  };
+
   var _setOpt = function(opt){
     _opt = opt;
+    // setup default, blank functions to avoid callback errors
+    _opt.error = _opt.error || function(){};
+    _opt.success = _opt.success || function(){}; // probably should be required
+    _opt.complete = _opt.complete || function(){};
   };
 
   var _events = function(){
     _xhr.addEventListener("load", function loadCallback(){
-      if (this.status === 200){
+      // range between 200 and 300?
+      if (this.status >= 200 && this.status < 300){
         _opt.success(this.response, _xhr.statusText, _xhr);
       } else {
         _opt.error(this, _xhr.status, _xhr.statusText);
@@ -57,13 +72,15 @@ var $ = (function(){
   };
 
   return {
-    ajax: ajax
+    ajax: ajax,
+    get: get,
+    post: post
   };
 
 })();
 
-var testOpts = 
-{ complete: function(xhr, statusText){
+var testOpts = { 
+  complete: function(xhr, statusText){
     console.log('request complete!');
     console.log(statusText);
   },
@@ -86,4 +103,14 @@ var testOpts =
   method: "GET",
   async: true
 
+};
+
+var testGetPost = {
+  url: "http://jsonplaceholder.typicode.com/posts",
+  data: {'userId': 1},
+
+  success: function(response, statusText, xhr){
+    console.log("success!");
+    console.log(response);
+  }
 };
